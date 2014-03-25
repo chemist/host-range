@@ -36,6 +36,8 @@ END
 Connection closed by foreign host.
 ```
 
+compiled binary for mac and ubuntu 12.04:
 
+http://yadi.sk/d/h1gAU5JvLCkEk
 
 
