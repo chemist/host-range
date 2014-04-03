@@ -3,24 +3,45 @@ host-range
 
 Simple util for generate host range.
 
-cabal build
+Update list of known packages:
+  
+  cabal update
 
-cabal install
+Update cabal if: 
+  
+  cabal --version < 1.18.0.0 
+  cabal install cabal-install
+
+Create sandbox:
+  
+  cabal sandbox init
+
+Install dependencies in sandbox:
+  
+  cabal install --dependencies-only -j4
+
+Build:
+  
+  cabal build
+
+Now you have binary in dist/build/host-range/host-range, copy host-range to directory from $PATH 
 
 Usage as util:
+  
+  echo "aaa-[000-004, 03 - 06 ].ya.ru,  test.ya.ru" | host-range
 
-echo "aaa-[000-004, 03 - 06 ].ya.ru,  test.ya.ru" | ./host-range
-
-Output: ["aaa-000.ya.ru","aaa-001.ya.ru","aaa-002.ya.ru","aaa-003.ya.ru","aaa-004.ya.ru","aaa-03.ya.ru","aaa-04.ya.ru","aaa-05.ya.ru","aaa-06.ya.ru","test.ya.ru"]
+Output: 
+  
+  ["aaa-000.ya.ru","aaa-001.ya.ru","aaa-002.ya.ru","aaa-003.ya.ru","aaa-004.ya.ru","aaa-03.ya.ru","aaa-04.ya.ru","aaa-05.ya.ru","aaa-06.ya.ru","test.ya.ru"]
 
 
 Usage as network server:
 
-./host-range -s
+  host-range -s
 
 open 4000 port
 
-work with memcached protocol
+Work with memcached protocol
 
 session example:
 ```
