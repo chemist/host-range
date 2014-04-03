@@ -7,7 +7,7 @@ Update list of known packages:
   
     > cabal update
 
-Update cabal if: 
+Update cabal for support sandbox: 
   
     > cabal --version               # must be > 1.18.0.0 
     > cabal install cabal-install   # if less
