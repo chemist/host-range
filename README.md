@@ -9,13 +9,14 @@ cabal install
 
 Usage as util:
 
-echo "[aaa-000 aaa-010, bb00 bb05]" | ./host-range
+echo "aaa-[000-004, 03 - 06 ].ya.ru,  test.ya.ru" | ./host-range
 
-Output: ["aaa-000","aaa-001","aaa-002","aaa-003","aaa-004","aaa-005","aaa-006","aaa-007","aaa-008","aaa-009","aaa-010","bb00","bb01","bb02","bb03","bb04","bb05"]
+Output: ["aaa-000.ya.ru","aaa-001.ya.ru","aaa-002.ya.ru","aaa-003.ya.ru","aaa-004.ya.ru","aaa-03.ya.ru","aaa-04.ya.ru","aaa-05.ya.ru","aaa-06.ya.ru","test.ya.ru"]
+
 
 Usage as network server:
 
-./host-range -d
+./host-range -s
 
 open 4000 port
 
@@ -23,15 +24,13 @@ work with memcached protocol
 
 session example:
 ```
- ~ -$ telnet localhost 4000                                                                                                                                  limbo-air@chemist :(
-Trying ::1...
-telnet: connect to address ::1: Connection refused
+➜  ~  telnet localhost 4000
 Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
-GET [ab-001 ab-010, host01.example.com host05.example.com]
-VALUE [ab-001 ab-010, host01.example.com host05.example.com] 0 166
-[ab-001,ab-002,ab-003,ab-004,ab-005,ab-006,ab-007,ab-008,ab-009,ab-010,host01.example.com,host02.example.com,host03.example.com,host04.example.com,host05.example.com]
+GET host-[001-003].ya.ru, simple.host.ru
+VALUE host-[001-003].ya.ru, simple.host.ru 0 61
+[host-001.ya.ru,host-002.ya.ru,host-003.ya.ru,simple.host.ru]
 END
 Connection closed by foreign host.
 ```

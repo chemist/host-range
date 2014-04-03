@@ -26,34 +26,47 @@ main = doWork =<< getArgs
                      "-s" -> server
                      _ -> (print "bad usage") >> exitFailure
 
-data Host = Host Text Int Int Text 
-          | Range Host Host
+data Host = Host Text  
+          | Range Text [(Int, Int, Int)] Text
           | Enum [Host] 
           deriving (Show, Eq)
 
 eval :: Host -> [Text]
-eval (Host p l i e) = [p <> justifyRight l '0' (tT i) <> e]
-eval (Range (Host p l i e) (Host _ _ i1 _)) = concatMap (\x -> eval (Host p l x e)) [i .. i1]
+eval (Host t) = [t]
+eval (Range p r e) = concatMap (\(l, i, i') -> concatMap (\x -> [p <> justifyRight l '0' (tT x) <> e]) [ i .. i' ]) r
 eval (Enum x) = concatMap eval x
 
 tT :: Int -> Text
 tT = pack . show
 
 host :: Parser Host
-host = do
+host = Host <$> takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z']  ++ ['0' .. '9'] ++ ".-") 
+
+range :: Parser Host
+range = do
     p <- preds
-    d <- many digit
+    char '[' 
+    r <- pair `sepBy'` separator
+--     ds <- many space *> many digit <* many space
+--     char '-' 
+--     dl <- many space *> many digit <* many space
+    char ']'
     e <- ends
-    return $ Host p (P.length d) (digitsToInt d) e
+    return $ Range p r e
+    where
+      preds = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ "-")
+      ends = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ".-")
+
+pair :: Parser (Int, Int, Int)
+pair = do
+    ds <- many space *> many digit <* many space
+    char '-'
+    dl <- many space *> many digit <* many space
+    return (P.length ds, digitsToInt ds, digitsToInt dl)
     where
       digitsToInt i = sum . map (uncurry (*)) $ zip razr (rv i)
       rv = reverse . map digitToInt
       razr = [1,10,100,1000,10000,100000,1000000,10000000]
-      preds = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ "-")
-      ends = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ".-")
-
-range :: Parser Host
-range = Range <$> (host <* many1 space ) <*> host 
 
 separator :: Parser ()
 separator = many' space *> char ',' *> many' space *> pure ()
@@ -62,7 +75,7 @@ enum :: Parser Host
 enum = Enum <$> (range <|> host ) `sepBy'` separator
 
 hosts :: Parser Host
-hosts = many' space *> char '[' *> many' space *> enum <* many' space <* char ']' <* many' space
+hosts = many' space *> enum <* many' space 
 
 work :: Text -> Either String [Text]
 work s = eval <$> parseOnly hosts s
@@ -84,7 +97,7 @@ conduit = do
          Just "GET " -> runHost (init . drop 4 <$> l)
          _ -> yield "CLIENT_ERROR only get request\r\n"
     where
-      lTt x = "[" <> foldl1 (\x y -> x <> "," <> y) x <> "]"
+      lTt x = "[" <> foldl1 (\z y -> z <> "," <> y) x <> "]"
       sizeD = pack . show . length . lTt
       runHost Nothing = yield "CLIENT_ERROR \r\n"
       runHost (Just str) = case work str of
