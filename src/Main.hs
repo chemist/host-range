@@ -40,22 +40,19 @@ tT :: Int -> Text
 tT = pack . show
 
 host :: Parser Host
-host = Host <$> takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z']  ++ ['0' .. '9'] ++ ".-") 
+host = Host <$> hostS 
 
 range :: Parser Host
 range = do
-    p <- preds
+    p <- hostS
     char '[' 
     r <- pair `sepBy'` separator
---     ds <- many space *> many digit <* many space
---     char '-' 
---     dl <- many space *> many digit <* many space
     char ']'
-    e <- ends
+    e <- hostS
     return $ Range p r e
-    where
-      preds = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ "-")
-      ends = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ".-")
+
+hostS :: Parser Text
+hostS = takeWhile (inClass $ ['A' .. 'Z'] ++ ['a' .. 'z']  ++ ['0' .. '9'] ++ ".-") 
 
 pair :: Parser (Int, Int, Int)
 pair = do
